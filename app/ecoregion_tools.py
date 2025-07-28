@@ -18,7 +18,10 @@ def get_db_conn():
     return conn
 
 
-@app.get("/ecoregion/by-coordinates")
+@app.get(
+    "/ecoregion/by-coordinates",
+    summary="Get WWF ecoregion by coordinates",
+    description="Calls a spatial function to determine the World Wildlife Fund's ecoregion code for given latitude and longitude.")
 async def get_ecoregion_by_coordinates(
     lat: float = Query(..., description="Latitude"),
     lon: float = Query(..., description="Longitude")
