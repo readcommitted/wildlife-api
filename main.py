@@ -39,7 +39,7 @@ async def landing_page():
             
             <h2>📚 API Endpoints</h2>
             <ul>
-                <li><code>/ecoregion/by-coordinates</code> – Lookup WWF ecoregion using lat/lon</li>
+                <li><code>/ecoregion/by-coordinates</code> – Lookup ecoregion using lat/lon</li>
                 <li><code>/species/by-ecoregion</code> – Get species in a given ecoregion</li>
                 <li><code>/species/identify-by-embedding</code> – Identify species using image embedding</li>
             </ul>
@@ -58,6 +58,23 @@ async def landing_page():
                 <li><a href="/docs">Interactive Swagger Docs</a></li>
                 <li><a href="/openapi.json">OpenAPI Spec</a></li>
             </ul>
+            <h2>⚙️ Powered By</h2>
+            
+            <ul>
+                <li><strong>📚 WildFinder Database</strong> — <a href="https://www.worldwildlife.org/publications/wildfinder-database" target="_blank">World Wildlife Fund (WWF)</a></li>
+                <li><strong>🧠 FastAPI-MCP</strong> — LLM-native tool wrapper for intelligent API workflows</li>
+                <li><strong>🐍 Python + FastAPI</strong> — Core server logic and routing</li>
+                <li><strong>🐘 PostgreSQL + PostGIS + PGVector</strong> — Spatial queries and similarity search</li>
+                <li><strong>🧬 OpenCLIP</strong> — Multimodal embeddings for image + text similarity</li>
+                <li><strong>🧪 LangGraph</strong> — Orchestration layer for agentic decision-making</li>
+            </ul>
+            
+            <p style="font-size: 0.9em;">
+                Citation: <em>World Wildlife Fund. WildFinder database. 
+                <a href="https://www.worldwildlife.org/publications/wildfinder-database" target="_blank">https://www.worldwildlife.org/publications/wildfinder-database</a>. 
+                Online; accessed June 25, 2025.</em>
+            </p>
+
         </body>
     </html>
     """
