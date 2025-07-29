@@ -42,4 +42,5 @@ async def get_species_by_ecoregion(
         raise HTTPException(status_code=500, detail=f"DB query failed: {e}")
     if not rows:
         raise HTTPException(status_code=404, detail="No species found for this ecoregion")
-    return [SpeciesByRegion(**dict(row)) for row in rows]
+    return [SpeciesByRegion(**row._mapping) for row in rows]
+
