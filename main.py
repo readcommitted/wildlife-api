@@ -1,24 +1,40 @@
 # app/main.py
+from fastapi import FastAPI
 from fastapi_mcp import FastApiMCP
-from app.ecoregion_tools import app
+from app.ecoregion_tools import router as ecoregion_router
+from app.similarity_tools import router as similarity_router
 
 
+# Create a combined FastAPI app
+app = FastAPI()
+
+# Register all routers at the root
+app.include_router(similarity_router)
+app.include_router(ecoregion_router)
+
+# Register with FastApiMCP
 mcp = FastApiMCP(
     app,
     name="Wildlife MCP",
-    description="Provides wildlife geospatial tools for ecoregion lookup and species identification.",
+    description=(
+        "An intelligent API powered by FastAPI + FastAPI-MCP. "
+        "Supports geospatial ecoregion lookup, species identification via embeddings, "
+        "and agentic reasoning workflows using LangGraph-compatible tools."
+    ),
     describe_full_response_schema=True,
     describe_all_responses=True,
-    include_operations=["get_ecoregion_by_coordinates"]  # Optional — filter to just callable tools
+    include_operations=[
+        "get_ecoregion_by_coordinates",
+        "identify_species_by_embedding"
+    ]
 )
-# Add MCP server to the FastAPI app
-mcp.mount_http()  # MCP server
 
+
+# Mount MCP HTTP interface and setup OpenAPI
+mcp.mount_http()
 mcp.setup_server()
 
-# Step 4: run it
+# Run server
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-

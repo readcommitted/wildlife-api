@@ -4,10 +4,11 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from pydantic import BaseModel
-
+from fastapi import APIRouter
 
 load_dotenv()
-app = FastAPI()
+
+router = APIRouter()
 
 
 def get_db_conn():
@@ -22,7 +23,7 @@ class EcoregionResponse(BaseModel):
     eco_code: str
 
 
-@app.get(
+@router.get(
     "/ecoregion/by-coordinates",
     operation_id="get_ecoregion_by_coordinates",
     summary="Get WWF ecoregion by coordinates",
