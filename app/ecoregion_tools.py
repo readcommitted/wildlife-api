@@ -3,7 +3,7 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
-
+from pydantic import BaseModel
 
 load_dotenv()
 app = FastAPI()
@@ -17,6 +17,9 @@ def get_db_conn():
     conn = psycopg2.connect(db_url, cursor_factory=RealDictCursor)
     return conn
 
+class EcoregionResponse(BaseModel):
+    eco_code: str
+
 
 @app.get(
     "/ecoregion/by-coordinates",
@@ -27,7 +30,7 @@ def get_db_conn():
 async def get_ecoregion_by_coordinates(
     lat: float = Query(..., description="Latitude"),
     lon: float = Query(..., description="Longitude")
-):
+) -> EcoregionResponse:
     """Returns eco_code for given lat/lon (spatial lookup in DB)."""
     try:
         conn = get_db_conn()
@@ -42,4 +45,5 @@ async def get_ecoregion_by_coordinates(
         raise HTTPException(status_code=500, detail=f"DB Error: {e}")
     if not result:
         raise HTTPException(status_code=404, detail="Ecoregion not found for these coordinates")
-    return {"eco_code": result["eco_code"]}
+    return EcoregionResponse(eco_code=result["eco_code"])
+
