@@ -7,3 +7,4 @@ mcp
 requests
 fastapi-mcp
 numpy
+pgvector
