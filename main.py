@@ -33,8 +33,8 @@ async def landing_page():
             </p>
             <p>
                 <strong>About MCP:</strong> This API is wrapped by <code>FastAPI-MCP</code>, making its endpoints
-                compatible with AI agents. Tools are discoverable through the OpenAPI spec and can be used in LangGraph
-                or LangChain workflows for intelligent orchestration and reasoning.
+                compatible with AI agents. Tools are discoverable through the OpenAPI spec and can be used in Agentic 
+                workflows for intelligent orchestration and reasoning.
             </p>
             
             <h2>📚 API Endpoints</h2>
