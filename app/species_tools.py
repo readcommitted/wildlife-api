@@ -36,7 +36,7 @@ async def get_species_by_ecoregion(
         rows = session.execute(text("""
             SELECT ecoregion_code, ecoregion_name, class_name, common_name, conservation_status
             FROM wildlife.species_by_region
-            WHERE ecoregion_code = :eco_code
+            WHERE common_name is not null and ecoregion_code = :eco_code
         """), {"eco_code": eco_code})
 
     except Exception as e:
