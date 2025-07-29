@@ -7,6 +7,7 @@ from db.db import SessionLocal
 from fastapi import APIRouter
 from dotenv import load_dotenv
 from sqlalchemy import text
+from typing import Optional
 
 load_dotenv()
 
@@ -17,7 +18,7 @@ class SpeciesByRegion(BaseModel):
     ecoregion_name: str
     class_name: str
     common_name: str
-    conservation_status: str
+    conservation_status: Optional[str]
 
 @router.get(
     "/species/by-ecoregion",
