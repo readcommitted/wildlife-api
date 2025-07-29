@@ -1,9 +1,10 @@
-from fastapi import FastAPI, APIRouter, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from pydantic import BaseModel
+
 
 load_dotenv()
 app = FastAPI()
@@ -25,7 +26,8 @@ class EcoregionResponse(BaseModel):
     "/ecoregion/by-coordinates",
     operation_id="get_ecoregion_by_coordinates",
     summary="Get WWF ecoregion by coordinates",
-    description="Returns the WWF ecoregion code for the given lat/lon point."
+    description="Returns the WWF ecoregion code for the given lat/lon point.",
+    response_model=EcoregionResponse
 )
 async def get_ecoregion_by_coordinates(
     lat: float = Query(..., description="Latitude"),
