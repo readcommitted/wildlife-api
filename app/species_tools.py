@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from db.db import SessionLocal
 from fastapi import APIRouter
 from dotenv import load_dotenv
+from sqlalchemy import text
 
 load_dotenv()
 
@@ -30,14 +31,13 @@ async def get_species_by_ecoregion(
 ) -> List[SpeciesByRegion]:
     session: Session = SessionLocal()
     try:
-        rows = session.execute(
-            """
+
+        rows = session.execute(text("""
             SELECT ecoregion_code, ecoregion_name, class_name, common_name, conservation_status
             FROM wildlife.species_by_region
             WHERE ecoregion_code = :eco_code
-            """,
-            {"eco_code": eco_code}
-        ).fetchall()
+        """), {"eco_code": eco_code})
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB query failed: {e}")
     if not rows:
