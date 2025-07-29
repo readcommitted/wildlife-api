@@ -7,6 +7,7 @@ from db.db import SessionLocal
 from db.species_model import SpeciesEmbedding
 from dotenv import load_dotenv
 from fastapi import APIRouter
+from sqlalchemy import text
 
 load_dotenv()
 
@@ -56,7 +57,7 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
     session: Session = SessionLocal()
 
     # --- Step 1: Candidate lookup from DB ---
-    sql = """
+    sql = text("""
         SELECT species, common_name, image_path, distance, eco_code
         FROM wildlife.usf_rank_species_candidates(
             (:lat)::double precision,
@@ -65,7 +66,8 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
             :category,
             :top_n
         )
-    """
+    """)
+
     try:
         top_candidates = session.execute(sql, {
             "lat": request.lat,
