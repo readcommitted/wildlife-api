@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi_mcp import FastApiMCP
 from app.ecoregion_tools import router as ecoregion_router
 from app.similarity_tools import router as similarity_router
-
+from app.species_tools import router as species_router
 
 # Create a combined FastAPI app
 app = FastAPI()
@@ -11,6 +11,7 @@ app = FastAPI()
 # Register all routers at the root
 app.include_router(similarity_router)
 app.include_router(ecoregion_router)
+app.include_router(species_router)
 
 # Register with FastApiMCP
 mcp = FastApiMCP(
@@ -25,7 +26,8 @@ mcp = FastApiMCP(
     describe_all_responses=True,
     include_operations=[
         "get_ecoregion_by_coordinates",
-        "identify_species_by_embedding"
+        "identify_species_by_embedding",
+        "get_species_by_ecoregion"
     ]
 )
 
