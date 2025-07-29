@@ -14,19 +14,55 @@ app = FastAPI()
 async def landing_page():
     return """
     <html>
-        <head><title>Wildlife MCP API</title></head>
-        <body style="font-family:sans-serif; max-width: 800px; margin: 4rem auto;">
+        <head>
+            <title>Wildlife MCP API</title>
+            <style>
+                body { font-family: sans-serif; max-width: 900px; margin: 4rem auto; line-height: 1.6; }
+                code { background: #f2f2f2; padding: 2px 4px; border-radius: 4px; }
+                pre { background: #f9f9f9; padding: 1rem; border-left: 4px solid #4CAF50; overflow-x: auto; }
+            </style>
+        </head>
+        <body>
             <h1>🌲 Wildlife MCP API</h1>
             <p>This API powers geospatial and species identification tools using embeddings, AI, and ecoregion logic.</p>
-            <h2>Available Tools</h2>
+
+            <h2>📌 Notes</h2>
+            <p>
+                <strong>Supported species:</strong> Currently limited to <strong>North American mammals and birds</strong>.
+                Additional ecoregions and species classes (e.g. reptiles, amphibians) are coming soon.
+            </p>
+            <p>
+                <strong>About MCP:</strong> This API is wrapped by <code>FastAPI-MCP</code>, making its endpoints
+                compatible with AI agents. Tools are discoverable through the OpenAPI spec and can be used in LangGraph
+                or LangChain workflows for intelligent orchestration and reasoning.
+            </p>
+            
+            <h2>📚 API Endpoints</h2>
+            <ul>
+                <li><code>/ecoregion/by-coordinates</code> – Lookup WWF ecoregion using lat/lon</li>
+                <li><code>/species/by-ecoregion</code> – Get species in a given ecoregion</li>
+                <li><code>/species/identify-by-embedding</code> – Identify species using image embedding</li>
+            </ul>
+
+            <h2>🚀 Example CURL Commands</h2>
+            <h3>Get ecoregion by coordinates</h3>
+            <pre><code>curl -X GET "https://api.wildlife.readcommitted.com/ecoregion/by-coordinates?lat=44.6&lon=-110.5" \\
+     -H "accept: application/json"</code></pre>
+
+            <h3>Get species by ecoregion</h3>
+            <pre><code>curl -X GET "https://api.wildlife.readcommitted.com/species/by-ecoregion?eco_code=NA0528" \\
+     -H "accept: application/json"</code></pre>
+
+            <h2>🔎 Developer Resources</h2>
             <ul>
                 <li><a href="/docs">Interactive Swagger Docs</a></li>
                 <li><a href="/openapi.json">OpenAPI Spec</a></li>
             </ul>
-            <p>Try endpoints like <code>/ecoregion/by-coordinates</code> or <code>/species/identify-by-embedding</code>.</p>
         </body>
     </html>
     """
+
+
 # Register all routers at the root
 app.include_router(similarity_router)
 app.include_router(ecoregion_router)
