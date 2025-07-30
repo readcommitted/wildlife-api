@@ -42,7 +42,7 @@ async def get_species_by_ecoregion(
     session: Session = SessionLocal()
     try:
         rows = session.execute(text("""
-            SELECT ecoregion_code, ecoregion_name, class_name, common_name, conservation_status
+            SELECT DISTINCT ecoregion_code, ecoregion_name, class_name, common_name, conservation_status
             FROM wildlife.species_by_region
             WHERE common_name IS NOT NULL AND ecoregion_code = :eco_code
         """), {"eco_code": eco_code}).fetchall()
