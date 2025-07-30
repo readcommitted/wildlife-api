@@ -13,7 +13,7 @@ app = FastAPI(
 )
 
 # Landing Page
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def landing_page():
     return """
     <html>
