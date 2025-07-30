@@ -7,7 +7,10 @@ from app.species_tools import router as species_router
 from fastapi.responses import HTMLResponse
 
 # Create a combined FastAPI app
-app = FastAPI()
+app = FastAPI(
+    docs_url=None,
+    redoc_url="/docs"
+)
 
 # Landing Page
 @app.get("/", response_class=HTMLResponse)
