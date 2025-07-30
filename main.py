@@ -71,12 +71,6 @@ async def landing_page():
                 <li><strong>🧬 OpenCLIP</strong> — Multimodal embeddings for image + text similarity</li>
                 <li><strong>🧪 LangGraph</strong> — Orchestration layer for agentic decision-making</li>
             </ul>
-            
-            <p style="font-size: 0.9em;">
-                Citation: <em>World Wildlife Fund. WildFinder database. 
-                <a href="https://www.worldwildlife.org/publications/wildfinder-database" target="_blank">https://www.worldwildlife.org/publications/wildfinder-database</a>. 
-                Online; accessed June 25, 2025.</em>
-            </p>
 
         </body>
     </html>
