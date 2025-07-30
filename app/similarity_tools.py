@@ -51,7 +51,8 @@ def cosine_similarity(a, b):
     operation_id="identify_species_by_embedding",
     summary="Identify species based on image embedding and location",
     description="Returns top-N species using image-text similarity, with final match chosen using weights or LLM reasoning.",
-    response_model=IdentificationResponse
+    response_model=IdentificationResponse,
+    tags=["Embeddings"]
 )
 async def identify_species(request: IdentificationRequest) -> IdentificationResponse:
     session: Session = SessionLocal()
