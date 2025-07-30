@@ -29,7 +29,7 @@ class EcoregionResponse(BaseModel):
     summary="Get WWF ecoregion by coordinates",
     description="Returns the WWF ecoregion code for the given lat/lon point.",
     response_model=EcoregionResponse,
-    tags=["Ecoregion"]
+    tags=["Ecoregion"], include_in_schema=False
 )
 async def get_ecoregion_by_coordinates(
     lat: float = Query(..., description="Latitude"),

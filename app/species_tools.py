@@ -26,7 +26,7 @@ class SpeciesByRegion(BaseModel):
     summary="Get species found in a WWF ecoregion",
     description="Returns species observed in the specified WWF ecoregion.",
     response_model=List[SpeciesByRegion],
-    tags=["Ecoregion"]
+    tags=["Species"], include_in_schema=False
 )
 async def get_species_by_ecoregion(
     eco_code: str = Query(..., description="WWF ecoregion code (e.g., NA0528)")
