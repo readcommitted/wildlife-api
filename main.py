@@ -58,7 +58,7 @@ async def landing_page():
 
             <h2>🔎 Developer Resources</h2>
             <ul>
-                <li><a href="/docs">Interactive Swagger Docs</a></li>
+                <li><a href="/docs">Interactive Redoc</a></li>
                 <li><a href="/openapi.json">OpenAPI Spec</a></li>
             </ul>
             <h2>⚙️ Powered By</h2>
