@@ -73,7 +73,7 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
         top_candidates = session.execute(sql, {
             "lat": request.lat,
             "lon": request.lon,
-            "embedding": request.embedding,
+            "embedding": np.array(request.embedding, dtype=np.float32).tolist(),
             "category": request.category,
             "top_n": request.top_n
         }).fetchall()
