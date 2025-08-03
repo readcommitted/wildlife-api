@@ -4,6 +4,7 @@ from fastapi_mcp import FastApiMCP
 from app.ecoregion_tools import router as ecoregion_router
 from app.similarity_tools import router as similarity_router
 from app.species_tools import router as species_router
+from app.rerank_with_weights_tool import router as rerank_with_weights_router
 from fastapi.responses import HTMLResponse
 
 # Create a combined FastAPI app
@@ -81,6 +82,8 @@ async def landing_page():
 app.include_router(similarity_router)
 app.include_router(ecoregion_router)
 app.include_router(species_router)
+app.include_router(rerank_with_weights_router)
+
 
 # Register with FastApiMCP
 mcp = FastApiMCP(
@@ -96,7 +99,8 @@ mcp = FastApiMCP(
     include_operations=[
         "get_ecoregion_by_coordinates",
         "identify_species_by_embedding",
-        "get_species_by_ecoregion"
+        "get_species_by_ecoregion",
+        "rerank_with_weights_router"
     ]
 )
 
