@@ -1,22 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from sqlalchemy.orm import Session
 import numpy as np
-from db.db import SessionLocal
-from db.species_model import SpeciesEmbedding
-from dotenv import load_dotenv
-
-load_dotenv()
 
 router = APIRouter()
-
-class RerankRequest(BaseModel):
-    image_id: int = Field(..., description="Image ID (for logging/debugging)")
-    embedding: List[float] = Field(..., description="OpenCLIP 1024-dim image embedding")
-    top_candidates: List[str] = Field(..., description="List of species identifiers to rerank")
-    image_weight: float = Field(0.6, description="Weight for image similarity")
-    text_weight: float = Field(0.4, description="Weight for text similarity")
 
 class Candidate(BaseModel):
     common_name: str
@@ -27,60 +14,48 @@ class Candidate(BaseModel):
     combined_score: float
     probability: float
 
+class RerankRequest(BaseModel):
+    top_candidates: List[Candidate]
+    image_weight: float = Field(..., description="New weight for image similarity")
+    text_weight: float = Field(..., description="New weight for text similarity")
+
 class RerankResponse(BaseModel):
     top_candidates: List[Candidate]
     best_match: Candidate
     rationale: Optional[str] = None
 
-def cosine_similarity(a, b):
-    a = np.asarray(a)
-    b = np.asarray(b)
-    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+def softmax(scores):
+    exp_scores = np.exp(scores - np.max(scores))
+    return exp_scores / exp_scores.sum()
 
 @router.post(
     "/species/rerank-with-weights",
     operation_id="rerank_with_weights",
-    summary="Rerank existing species candidates with new weights",
-    description="Takes a list of candidate species and reranks using image-text similarity with provided weights.",
+    summary="Rerank species candidates with adjusted weights",
+    description="Recomputes combined scores and probabilities using updated image/text similarity weights.",
     response_model=RerankResponse,
     tags=["Species"]
 )
 async def rerank_with_weights(request: RerankRequest) -> RerankResponse:
-    session: Session = SessionLocal()
-    embedding_np = np.array(request.embedding, dtype=np.float32)
+    # --- Step 1: Recompute combined scores ---
+    recomputed = []
+    for c in request.top_candidates:
+        combined = request.image_weight * c.image_similarity + request.text_weight * c.text_similarity
+        recomputed.append((c, combined))
 
-    scored_candidates = []
-    for species_id in request.top_candidates:
-        db_row = session.query(SpeciesEmbedding).filter_by(species=species_id).first()
-        if not db_row or db_row.image_embedding is None or db_row.text_embedding is None:
-            continue
-        img_sim = cosine_similarity(embedding_np, db_row.image_embedding)
-        text_sim = cosine_similarity(embedding_np, db_row.text_embedding)
-        combined = request.image_weight * img_sim + request.text_weight * text_sim
-        scored_candidates.append((
-            db_row.common_name,
-            db_row.species,
-            db_row.ecoregion_code or "",
-            img_sim,
-            text_sim,
-            combined
-        ))
+    # --- Step 2: Compute softmax ---
+    scores = [r[1] for r in recomputed]
+    probs = softmax(scores)
 
-    if not scored_candidates:
-        raise HTTPException(status_code=404, detail="No valid candidates with embeddings found")
-
-    scores = [x[5] for x in scored_candidates]
-    exp_scores = np.exp(scores)
-    probs = exp_scores / np.sum(exp_scores)
-
+    # --- Step 3: Build new candidate list ---
     candidates: List[Candidate] = []
-    for i, (common_name, species, eco_code, img_sim, text_sim, combined) in enumerate(scored_candidates):
+    for i, (old, combined) in enumerate(recomputed):
         candidates.append(Candidate(
-            common_name=common_name,
-            species=species,
-            eco_code=eco_code,
-            image_similarity=img_sim,
-            text_similarity=text_sim,
+            common_name=old.common_name,
+            species=old.species,
+            eco_code=old.eco_code,
+            image_similarity=old.image_similarity,
+            text_similarity=old.text_similarity,
             combined_score=combined,
             probability=float(probs[i])
         ))
@@ -89,8 +64,8 @@ async def rerank_with_weights(request: RerankRequest) -> RerankResponse:
     best = candidates[best_idx]
 
     rationale = (
-        f"Reranked using weights (image: {request.image_weight:.1f}, text: {request.text_weight:.1f}). "
-        f"New best match: {best.common_name} with probability {best.probability:.2f}."
+        f"Reranked candidates using weights (image: {request.image_weight:.1f}, text: {request.text_weight:.1f}). "
+        f"Best match is now {best.common_name} with probability {best.probability:.2f}."
     )
 
     return RerankResponse(
