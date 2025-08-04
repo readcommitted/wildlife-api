@@ -77,6 +77,7 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
             "category": request.category,
             "top_n": request.top_n
         }).fetchall()
+        session.close()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB candidate selection failed: {e}")
 
