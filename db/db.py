@@ -27,6 +27,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import dotenv
 import os
+from sqlalchemy.pool import QueuePool
 
 dotenv.load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", None)
@@ -35,7 +36,16 @@ DATABASE_URL = os.getenv("DATABASE_URL", None)
 Base = declarative_base()
 
 # --- Database Engine ---
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    poolclass=QueuePool,        # Default, but explicit is better
+    pool_size=5,                # Number of persistent connections
+    max_overflow=10,            # Extra connections allowed beyond pool_size
+    pool_timeout=30,            # Max seconds to wait for connection
+    pool_recycle=1800,          # Recycle connections after 30 min
+    pool_pre_ping=True          # Check if connection is alive before using
+)
+
 
 # --- Session Factory ---
 SessionLocal = sessionmaker(bind=engine)
