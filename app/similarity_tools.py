@@ -18,7 +18,6 @@ class IdentificationRequest(BaseModel):
     embedding: List[float] = Field(..., description="OpenCLIP 1024-dim image embedding")
     lat: float = Field(..., description="Latitude of the image location")
     lon: float = Field(..., description="Longitude of the image location")
-    category: str = Field(..., description="Broad category like 'mammal' or 'bird'")
     top_n: int = Field(5, description="Number of candidate species to return")
     image_weight: float = Field(0.6, description="Weight for image similarity")
     text_weight: float = Field(0.4, description="Weight for text similarity")
@@ -64,7 +63,6 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
             (:lat)::double precision,
             (:lon)::double precision,
             (:embedding)::vector,
-            :category,
             :top_n
         )
     """)
@@ -74,7 +72,6 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
             "lat": request.lat,
             "lon": request.lon,
             "embedding": np.array(request.embedding, dtype=np.float32).tolist(),
-            "category": request.category,
             "top_n": request.top_n
         }).fetchall()
         session.close()
