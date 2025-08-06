@@ -3,7 +3,9 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import numpy as np
 
+
 router = APIRouter()
+
 
 class Candidate(BaseModel):
     common_name: str
@@ -14,19 +16,23 @@ class Candidate(BaseModel):
     combined_score: float
     probability: float
 
+
 class RerankRequest(BaseModel):
     top_candidates: List[Candidate]
     image_weight: float = Field(..., description="New weight for image similarity")
     text_weight: float = Field(..., description="New weight for text similarity")
+
 
 class RerankResponse(BaseModel):
     top_candidates: List[Candidate]
     best_match: Candidate
     rationale: Optional[str] = None
 
+
 def softmax(scores):
     exp_scores = np.exp(scores - np.max(scores))
     return exp_scores / exp_scores.sum()
+
 
 @router.post(
     "/species/rerank-with-weights",

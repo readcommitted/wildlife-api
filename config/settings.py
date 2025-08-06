@@ -6,17 +6,11 @@ Secrets (API keys, tokens) reside in secrets.toml for Streamlit.
 """
 
 import os
-from dotenv import load_dotenv
 from pathlib import Path
 
 
-# --- Load .env ---
-
-load_dotenv()
-
 
 # --- Helper Functions ---
-
 def normalize_root(env_var: str, default: str) -> Path:
     """
     Resolve a filesystem path from an environment variable, falling back to a default.

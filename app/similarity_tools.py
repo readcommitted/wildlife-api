@@ -1,16 +1,16 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from sqlalchemy.orm import Session
 import numpy as np
 from db.db import SessionLocal
 from db.species_model import SpeciesEmbedding
-from fastapi import APIRouter
 from sqlalchemy import text
 
 
 router = APIRouter()
 
+
+# --- Request/Response Models ---
 class IdentificationRequest(BaseModel):
     image_id: int = Field(..., description="Image ID (for logging/debugging)")
     embedding: List[float] = Field(..., description="OpenCLIP 1024-dim image embedding")
@@ -37,12 +37,15 @@ class IdentificationResponse(BaseModel):
     rationale: Optional[str] = None
 
 
+# --- Utility ---
+
 def cosine_similarity(a, b):
     a = np.asarray(a)
     b = np.asarray(b)
     return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
 
 
+# --- Endpoint ---
 @router.post(
     "/species/identify-by-embedding",
     operation_id="identify_species_by_embedding",
@@ -52,44 +55,43 @@ def cosine_similarity(a, b):
     tags=["Species"]
 )
 async def identify_species(request: IdentificationRequest) -> IdentificationResponse:
-    session: Session = SessionLocal()
-
-    # --- Step 1: Candidate lookup from DB ---
-    sql = text("""
-        SELECT species, common_name, image_path, distance, eco_code
-        FROM wildlife.usf_rank_species_candidates(
-            (:lat)::double precision,
-            (:lon)::double precision,
-            (:embedding)::vector,
-            :top_n
-        )
-    """)
-
     try:
-        top_candidates = session.execute(sql, {
-            "lat": request.lat,
-            "lon": request.lon,
-            "embedding": np.array(request.embedding, dtype=np.float32).tolist(),
-            "top_n": request.top_n
-        }).fetchall()
-        session.close()
+        with SessionLocal() as session:
+            # --- Step 1: Candidate lookup from DB ---
+            sql = text("""
+                SELECT species, common_name, image_path, distance, eco_code
+                FROM wildlife.usf_rank_species_candidates(
+                    (:lat)::double precision,
+                    (:lon)::double precision,
+                    (:embedding)::vector,
+                    :top_n
+                )
+            """)
+
+            top_candidates = session.execute(sql, {
+                "lat": request.lat,
+                "lon": request.lon,
+                "embedding": np.array(request.embedding, dtype=np.float32).tolist(),
+                "top_n": request.top_n
+            }).fetchall()
+
+            if not top_candidates:
+                raise HTTPException(status_code=404, detail="No candidates found")
+
+            # --- Step 2: Score with text embeddings ---
+            scored_candidates = []
+            for row in top_candidates:
+                species, common_name, _, distance, eco_code = row
+                db_row = session.query(SpeciesEmbedding).filter_by(species=species).first()
+                if not db_row or db_row.text_embedding is None:
+                    continue
+                img_sim = 1 - distance
+                text_sim = cosine_similarity(request.embedding, db_row.text_embedding)
+                combined = request.image_weight * img_sim + request.text_weight * text_sim
+                scored_candidates.append((common_name, species, eco_code, img_sim, text_sim, combined))
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"DB candidate selection failed: {e}")
-
-    if not top_candidates:
-        raise HTTPException(status_code=404, detail="No candidates found")
-
-    # --- Step 2: Score with text embeddings ---
-    scored_candidates = []
-    for row in top_candidates:
-        species, common_name, _, distance, eco_code = row
-        db_row = session.query(SpeciesEmbedding).filter_by(species=species).first()
-        if not db_row or db_row.text_embedding is None:
-            continue
-        img_sim = 1 - distance
-        text_sim = cosine_similarity(request.embedding, db_row.text_embedding)
-        combined = request.image_weight * img_sim + request.text_weight * text_sim
-        scored_candidates.append((common_name, species, eco_code, img_sim, text_sim, combined))
+        raise HTTPException(status_code=500, detail=f"DB operation failed: {e}")
 
     if not scored_candidates:
         raise HTTPException(status_code=404, detail="No candidates with valid text embeddings")
@@ -99,6 +101,7 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
     exp_scores = np.exp(scores)
     probs = exp_scores / np.sum(exp_scores)
 
+    # --- Step 4: Build response ---
     candidates: List[Candidate] = []
     for i, (common_name, species, eco_code, img_sim, text_sim, combined) in enumerate(scored_candidates):
         candidates.append(Candidate(
@@ -111,7 +114,6 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
             probability=float(probs[i])
         ))
 
-    # --- Step 4: Best match ---
     best_idx = int(np.argmax(probs))
     best = candidates[best_idx]
 

@@ -1,21 +1,10 @@
-from fastapi import FastAPI, Query, HTTPException
-import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from fastapi import APIRouter
-
+from sqlalchemy import text
+from db.db import SessionLocal
 
 router = APIRouter()
 
-
-def get_db_conn():
-    # Read DATABASE_URL from environment (DO App Platform or local .env)
-    db_url = os.environ.get("DATABASE_URL")
-    if not db_url:
-        raise RuntimeError("DATABASE_URL env variable not set!")
-    conn = psycopg2.connect(db_url, cursor_factory=RealDictCursor)
-    return conn
 
 class EcoregionResponse(BaseModel):
     eco_code: str
@@ -35,17 +24,16 @@ async def get_ecoregion_by_coordinates(
 ) -> EcoregionResponse:
     """Returns eco_code for given lat/lon (spatial lookup in DB)."""
     try:
-        conn = get_db_conn()
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT eco_code FROM public.get_ecoregion_by_coords(%s, %s) LIMIT 1",
-                (lat, lon)
-            )
-            result = cur.fetchone()
-        conn.close()
+        with SessionLocal() as session:
+            result = session.execute(
+                text("SELECT eco_code FROM public.get_ecoregion_by_coords(:lat, :lon) LIMIT 1"),
+                {"lat": lat, "lon": lon}
+            ).fetchone()
+
+        if not result:
+            raise HTTPException(status_code=404, detail="Ecoregion not found for these coordinates")
+
+        return EcoregionResponse(eco_code=result["eco_code"])
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB Error: {e}")
-    if not result:
-        raise HTTPException(status_code=404, detail="Ecoregion not found for these coordinates")
-    return EcoregionResponse(eco_code=result["eco_code"])
-
