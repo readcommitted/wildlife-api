@@ -18,29 +18,24 @@ Dependencies:
 - SQLAlchemy for ORM and engine management
 - Project settings for environment-based configuration
 
-Author: Matt Scardino
-Project: Wildlife Vision System
+
 """
 
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import dotenv
 import os
-from sqlalchemy.pool import QueuePool
 
 
-dotenv.load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", None)
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set. Check your .env or DO env variables.")
 
 # --- ORM Base Class ---
 Base = declarative_base()
 
 # --- Database Engine ---
-engine = create_engine(
-    DATABASE_URL
-)
-
+engine = create_engine(DATABASE_URL)
 
 # --- Session Factory ---
 SessionLocal = sessionmaker(bind=engine)

@@ -2,11 +2,9 @@ from fastapi import FastAPI, Query, HTTPException
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from dotenv import load_dotenv
 from pydantic import BaseModel
 from fastapi import APIRouter
 
-load_dotenv()
 
 router = APIRouter()
 

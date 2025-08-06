@@ -5,11 +5,9 @@ from sqlalchemy.orm import Session
 import numpy as np
 from db.db import SessionLocal
 from db.species_model import SpeciesEmbedding
-from dotenv import load_dotenv
 from fastapi import APIRouter
 from sqlalchemy import text
 
-load_dotenv()
 
 router = APIRouter()
 

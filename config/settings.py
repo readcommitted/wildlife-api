@@ -33,4 +33,4 @@ try:
 
 except ImportError:
     OPENAI_API_KEY = None
-    USER_AGENT = os.getenv('USER_AGENT', 'CoLotteryBot/1.0 (example@example.com)')
+
