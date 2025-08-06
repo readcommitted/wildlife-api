@@ -37,13 +37,7 @@ Base = declarative_base()
 
 # --- Database Engine ---
 engine = create_engine(
-    DATABASE_URL,
-    poolclass=QueuePool,        # Default, but explicit is better
-    pool_size=5,                # Number of persistent connections
-    max_overflow=10,            # Extra connections allowed beyond pool_size
-    pool_timeout=30,            # Max seconds to wait for connection
-    pool_recycle=60,          # Recycle connections after 30 min
-    pool_pre_ping=True          # Check if connection is alive before using
+    DATABASE_URL
 )
 
 
