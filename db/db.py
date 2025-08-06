@@ -28,8 +28,11 @@ import os
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", None)
+print(f"DATABASE_URL at startup: {DATABASE_URL!r}")  # Debug line
+
 if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set. Check your .env or DO env variables.")
+    raise RuntimeError("DATABASE_URL is not set. Check your .env or DO environment variables.")
+
 
 # --- ORM Base Class ---
 Base = declarative_base()
