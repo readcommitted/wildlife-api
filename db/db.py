@@ -29,6 +29,7 @@ import dotenv
 import os
 from sqlalchemy.pool import QueuePool
 
+
 dotenv.load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", None)
 
