@@ -37,10 +37,12 @@ class Candidate(BaseModel):
     combined_score: float
     probability: float
 
+
 class IdentificationResponse(BaseModel):
     top_candidates: List[Candidate]
     best_match: Candidate
     rationale: Optional[str] = None
+
 
 # --- Utility ---
 def cosine_similarity(a, b):
