@@ -23,7 +23,7 @@ Author: Matt Scardino
 Project: Wildlife Vision System
 """
 
-from sqlalchemy import Column, Integer, Text, Boolean, TIMESTAMP, DateTime
+from sqlalchemy import Column, Integer, Text, Boolean, TIMESTAMP, DateTime, Float, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from pgvector.sqlalchemy import Vector
@@ -115,3 +115,21 @@ class SpeciesEmbedding(Base):
     conservation_code = Column(Text)
     conservation_status = Column(Text)
     extinct = Column(Boolean)
+
+
+class SpeciesColorProfile(Base):
+    __tablename__ = "species_color_profile"
+    __table_args__ = {"schema": "wildlife"}
+
+    common_name = Column(Text, primary_key=True)
+
+    color_0 = Column(Text)
+    color_0_pct = Column(Float)
+
+    color_1 = Column(Text)
+    color_1_pct = Column(Float)
+
+    color_2 = Column(Text)
+    color_2_pct = Column(Float)
+
+    colors = Column(JSON)

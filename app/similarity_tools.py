@@ -5,10 +5,14 @@ import numpy as np
 from db.db import SessionLocal
 from db.species_model import SpeciesEmbedding
 from sqlalchemy import text
-
+from tools.colors import (
+    get_image_colors,
+    get_species_color_profile,
+    compute_color_similarity,
+    get_color_vocab
+)
 
 router = APIRouter()
-
 
 # --- Request/Response Models ---
 class IdentificationRequest(BaseModel):
@@ -19,7 +23,7 @@ class IdentificationRequest(BaseModel):
     top_n: int = Field(5, description="Number of candidate species to return")
     image_weight: float = Field(0.6, description="Weight for image similarity")
     text_weight: float = Field(0.4, description="Weight for text similarity")
-
+    color_weight: float = Field(0.0, description="Weight for color similarity")
 
 class Candidate(BaseModel):
     common_name: str
@@ -27,37 +31,35 @@ class Candidate(BaseModel):
     eco_code: str
     image_similarity: float
     text_similarity: float
+    color_similarity: Optional[float] = None
+    image_colors: Optional[dict] = None
+    species_colors: Optional[dict] = None
     combined_score: float
     probability: float
-
 
 class IdentificationResponse(BaseModel):
     top_candidates: List[Candidate]
     best_match: Candidate
     rationale: Optional[str] = None
 
-
 # --- Utility ---
-
 def cosine_similarity(a, b):
     a = np.asarray(a)
     b = np.asarray(b)
     return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
-
 
 # --- Endpoint ---
 @router.post(
     "/species/identify-by-embedding",
     operation_id="identify_species_by_embedding",
     summary="Identify species based on image embedding and location",
-    description="Returns top-N species using image-text similarity, with final match chosen using weights or LLM reasoning.",
+    description="Returns top-N species using image-text-color similarity, with final match chosen using weights or LLM reasoning.",
     response_model=IdentificationResponse,
     tags=["Species"]
 )
 async def identify_species(request: IdentificationRequest) -> IdentificationResponse:
     try:
         with SessionLocal() as session:
-            # --- Step 1: Candidate lookup from DB ---
             sql = text("""
                 SELECT species, common_name, image_path, distance, eco_code
                 FROM wildlife.usf_rank_species_candidates(
@@ -78,17 +80,30 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
             if not top_candidates:
                 raise HTTPException(status_code=404, detail="No candidates found")
 
-            # --- Step 2: Score with text embeddings ---
+            image_colors = get_image_colors(session, request.image_id)
+            vocab = get_color_vocab(session)
+
             scored_candidates = []
             for row in top_candidates:
                 species, common_name, _, distance, eco_code = row
                 db_row = session.query(SpeciesEmbedding).filter_by(species=species).first()
                 if not db_row or db_row.text_embedding is None:
                     continue
+
                 img_sim = 1 - distance
                 text_sim = cosine_similarity(request.embedding, db_row.text_embedding)
-                combined = request.image_weight * img_sim + request.text_weight * text_sim
-                scored_candidates.append((common_name, species, eco_code, img_sim, text_sim, combined))
+                species_colors = get_species_color_profile(session, common_name)
+                color_sim = compute_color_similarity(image_colors, species_colors, vocab)
+
+                combined = (
+                    request.image_weight * img_sim +
+                    request.text_weight * text_sim +
+                    request.color_weight * color_sim
+                )
+
+                scored_candidates.append((
+                    common_name, species, eco_code, img_sim, text_sim, color_sim, combined, image_colors, species_colors
+                ))
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB operation failed: {e}")
@@ -96,20 +111,21 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
     if not scored_candidates:
         raise HTTPException(status_code=404, detail="No candidates with valid text embeddings")
 
-    # --- Step 3: Softmax probability ---
-    scores = [x[5] for x in scored_candidates]
+    scores = [x[6] for x in scored_candidates]
     exp_scores = np.exp(scores)
     probs = exp_scores / np.sum(exp_scores)
 
-    # --- Step 4: Build response ---
     candidates: List[Candidate] = []
-    for i, (common_name, species, eco_code, img_sim, text_sim, combined) in enumerate(scored_candidates):
+    for i, (common_name, species, eco_code, img_sim, text_sim, color_sim, combined, img_cols, sp_cols) in enumerate(scored_candidates):
         candidates.append(Candidate(
             common_name=common_name,
             species=species,
             eco_code=eco_code,
             image_similarity=img_sim,
             text_similarity=text_sim,
+            color_similarity=color_sim,
+            image_colors=img_cols,
+            species_colors=sp_cols,
             combined_score=combined,
             probability=float(probs[i])
         ))
@@ -117,9 +133,9 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
     best_idx = int(np.argmax(probs))
     best = candidates[best_idx]
 
-    # --- Step 5: Placeholder LLM rationale ---
     rationale = (
-        f"Selected best match using weights (image: {request.image_weight:.1f}, text: {request.text_weight:.1f}). "
+        f"Selected best match using weights (image: {request.image_weight:.1f}, "
+        f"text: {request.text_weight:.1f}, color: {request.color_weight:.1f}). "
         f"Best candidate: {best.common_name} with probability {best.probability:.2f}."
     )
 
