@@ -2,6 +2,8 @@ from sqlalchemy import text
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from db.species_model import SpeciesColorProfile
+from sqlalchemy import func
+
 
 def compute_color_similarity(image_colors: dict, species_colors: dict, vocab: list[str]) -> float:
     """
@@ -42,7 +44,7 @@ def get_color_vocab(session):
 def get_species_color_profile(session, common_name: str) -> dict:
     row = (
         session.query(SpeciesColorProfile)
-        .filter(SpeciesColorProfile.common_name == common_name)
+        .filter(func.lower(SpeciesColorProfile.common_name) == common_name.lower())
         .first()
     )
     if row and row.colors:

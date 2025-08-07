@@ -9,3 +9,4 @@ fastapi-mcp
 numpy
 pgvector
 typing
+scikit-learn
