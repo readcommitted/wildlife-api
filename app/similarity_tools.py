@@ -5,7 +5,7 @@ import numpy as np
 from db.db import SessionLocal
 from db.species_model import SpeciesEmbedding
 from sqlalchemy import text
-from tools.colors import (
+from tools.color_utils import (
     get_image_colors,
     get_species_color_profile,
     compute_color_similarity,

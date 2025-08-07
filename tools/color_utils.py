@@ -48,3 +48,11 @@ def get_species_color_profile(session, common_name: str) -> dict:
     if row and row.colors:
         return row.colors
     return {}  # fallback
+
+
+def get_image_colors(session, image_id):
+    row = session.execute(text("""
+        SELECT colors FROM wildlife.image_feature
+        WHERE image_id = :image_id
+    """), {"image_id": image_id}).fetchone()
+    return row[0] if row and row[0] else {}
