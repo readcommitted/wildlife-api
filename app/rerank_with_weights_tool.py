@@ -12,7 +12,7 @@ class Candidate(BaseModel):
     eco_code: str
     image_similarity: float
     text_similarity: float
-    color_similarity: Optional[float] = 0.0
+    color_similarity: float = 0.0
     combined_score: float
     probability: float
 
