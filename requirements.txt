@@ -10,3 +10,4 @@ numpy
 pgvector
 typing
 scikit-learn
+boto3
