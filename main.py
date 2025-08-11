@@ -7,7 +7,6 @@ from app.species_tools import router as species_router
 from app.rerank_with_weights_tool import router as rerank_with_weights_router
 from tools.seed_router import router as seed_router
 from fastapi.responses import HTMLResponse
-from fastapi.middleware.cors import CORSMiddleware
 
 
 # Create a combined FastAPI app
@@ -86,20 +85,6 @@ app.include_router(similarity_router)
 app.include_router(ecoregion_router)
 app.include_router(species_router)
 app.include_router(rerank_with_weights_router)
-
-
-# Middleware for Streamlit client app
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://api.wildlife.readcommitted.com",
-        "http://localhost:8501"
-    ],
-    allow_credentials=False,
-    allow_methods=["GET"],
-    allow_headers=["*"],
-)
-
 
 app.include_router(seed_router)
 
