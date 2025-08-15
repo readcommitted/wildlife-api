@@ -28,7 +28,7 @@ async def get_ecoregion_by_coordinates(
             result = session.execute(
                 text("SELECT eco_code FROM public.get_ecoregion_by_coords(:lat, :lon) LIMIT 1"),
                 {"lat": lat, "lon": lon}
-            ).fetchone()
+            ).mappings().fetchone()
 
         if not result:
             raise HTTPException(status_code=404, detail="Ecoregion not found for these coordinates")
