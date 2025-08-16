@@ -64,7 +64,7 @@ async def landing_page():
                 <li><a href="/docs">Interactive Redoc</a></li>
                 <li><a href="/openapi.json">OpenAPI Spec</a></li>
             </ul>
-            <h2>⚙️ Powered By</h2>
+            <h2>⚙Powered By</h2>
             
             <ul>
                 <li><strong>WildFinder Database</strong> — <a href="https://www.worldwildlife.org/publications/wildfinder-database" target="_blank">World Wildlife Fund (WWF)</a></li>
