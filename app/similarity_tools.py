@@ -24,6 +24,8 @@ class IdentificationRequest(BaseModel):
     image_weight: float = Field(0.6, description="Weight for image similarity")
     text_weight: float = Field(0.4, description="Weight for text similarity")
     color_weight: float = Field(0.0, description="Weight for color similarity")
+    image_colors: Optional[dict[str, float]] = Field(default_factory=dict, description="Client-side extracted color proportions")
+
 
 class Candidate(BaseModel):
     common_name: str
@@ -82,7 +84,8 @@ async def identify_species(request: IdentificationRequest) -> IdentificationResp
             if not top_candidates:
                 raise HTTPException(status_code=404, detail="No candidates found")
 
-            image_colors = get_image_colors(session, request.image_id)
+            # image colors should be coming from client app.
+            image_colors = request.image_colors or {}
             vocab = get_color_vocab(session)
 
             scored_candidates = []
