@@ -11,3 +11,6 @@ pgvector
 typing
 scikit-learn
 boto3
+pillow
+streamlit
+st-pages==1.0.1

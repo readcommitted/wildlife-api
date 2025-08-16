@@ -29,10 +29,10 @@ async def landing_page():
             </style>
         </head>
         <body>
-            <h1>🌲 Wildlife MCP API</h1>
+            <h1>🐾 Wildlife MCP API 🐾</h1>
             <p>This API powers geospatial and species identification tools using embeddings, AI, and ecoregion logic.</p>
 
-            <h2>📌 Notes</h2>
+            <h2>Notes</h2>
             <p>
                 <strong>Supported species:</strong> Currently limited to <strong>North American mammals and birds</strong>.
                 Additional ecoregions and species classes (e.g. reptiles, amphibians) are coming soon.
@@ -43,14 +43,14 @@ async def landing_page():
                 workflows for intelligent orchestration and reasoning.
             </p>
             
-            <h2>📚 API Endpoints</h2>
+            <h2>API Endpoints</h2>
             <ul>
                 <li><code>/ecoregion/by-coordinates</code> – Lookup ecoregion using lat/lon</li>
                 <li><code>/species/by-ecoregion</code> – Get species in a given ecoregion</li>
                 <li><code>/species/identify-by-embedding</code> – Identify species using image embedding</li>
             </ul>
 
-            <h2>🚀 Example CURL Commands</h2>
+            <h2>Example CURL Commands</h2>
             <h3>Get ecoregion by coordinates</h3>
             <pre><code>curl -X GET "https://api.wildlife.readcommitted.com/ecoregion/by-coordinates?lat=44.6&lon=-110.5" \\
      -H "accept: application/json"</code></pre>
@@ -67,12 +67,12 @@ async def landing_page():
             <h2>⚙️ Powered By</h2>
             
             <ul>
-                <li><strong>📚 WildFinder Database</strong> — <a href="https://www.worldwildlife.org/publications/wildfinder-database" target="_blank">World Wildlife Fund (WWF)</a></li>
-                <li><strong>🧠 FastAPI-MCP</strong> — LLM-native tool wrapper for intelligent API workflows</li>
-                <li><strong>🐍 Python + FastAPI</strong> — Core server logic and routing</li>
-                <li><strong>🐘 PostgreSQL + PostGIS + PGVector</strong> — Spatial queries and similarity search</li>
-                <li><strong>🧬 OpenCLIP</strong> — Multimodal embeddings for image + text similarity</li>
-                <li><strong>🧪 LangGraph</strong> — Orchestration layer for agentic decision-making</li>
+                <li><strong>WildFinder Database</strong> — <a href="https://www.worldwildlife.org/publications/wildfinder-database" target="_blank">World Wildlife Fund (WWF)</a></li>
+                <li><strong>FastAPI-MCP</strong> — LLM-native tool wrapper for intelligent API workflows</li>
+                <li><strong>Python + FastAPI</strong> — Core server logic and routing</li>
+                <li><strong>PostgreSQL + PostGIS + PGVector</strong> — Spatial queries and similarity search</li>
+                <li><strong>OpenCLIP</strong> — Multimodal embeddings for image + text similarity</li>
+                <li><strong>LangGraph</strong> — Orchestration layer for agentic decision-making</li>
             </ul>
 
         </body>
