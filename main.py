@@ -50,21 +50,13 @@ async def landing_page():
                 <li><code>/species/identify-by-embedding</code> – Identify species using image embedding</li>
             </ul>
 
-            <h2>Example CURL Commands</h2>
-            <h3>Get ecoregion by coordinates</h3>
-            <pre><code>curl -X GET "https://api.wildlife.readcommitted.com/ecoregion/by-coordinates?lat=44.6&lon=-110.5" \\
-     -H "accept: application/json"</code></pre>
-
-            <h3>Get species by ecoregion</h3>
-            <pre><code>curl -X GET "https://api.wildlife.readcommitted.com/species/by-ecoregion?eco_code=NA0528" \\
-     -H "accept: application/json"</code></pre>
-
-            <h2>🔎 Developer Resources</h2>
+            
+            <h2>Developer Resources</h2>
             <ul>
                 <li><a href="/docs">Interactive Redoc</a></li>
                 <li><a href="/openapi.json">OpenAPI Spec</a></li>
             </ul>
-            <h2>⚙Powered By</h2>
+            <h2>Powered By</h2>
             
             <ul>
                 <li><strong>WildFinder Database</strong> — <a href="https://www.worldwildlife.org/publications/wildfinder-database" target="_blank">World Wildlife Fund (WWF)</a></li>
