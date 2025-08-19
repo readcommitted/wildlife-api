@@ -56,3 +56,7 @@ This API is wrapped by **[FastAPI-MCP](https://github.com/modelcontextprotocol/f
    ```bash
    git clone https://github.com/readcommitted/wildlife-vision-pipeline.git
    cd wildlife-vision-pipeline
+
+## 📜 License
+
+MIT License – See [LICENSE](./LICENSE) for details.
